@@ -53,7 +53,8 @@ export function getStoreAndKeySet<K>(
     multipleStoreKey = `${propertyName}Store`;
   }
 
-  const singleStore: Map<string, Observable<K>> = target[singleStoreKey],
+  const singleStore: Map<string, Observable<K>> = target[singleStoreKey] ??
+    new Map<string, Observable<K>>(),
     store = new Map<string, Observable<string[]>>();
 
   return [multipleStoreKey, store, singleStore];

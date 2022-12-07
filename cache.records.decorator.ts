@@ -5,8 +5,10 @@ import { getStoreAndKeySet } from "./functions.decorator";
 
 /**
  * Add multiple record caching to an observable-returning class method
+ *
  * @param options Caching options
  * @returns Original method with caching added
+ * @see README.md For example usage
  */
 export function CacheRecords<K = any>(options?: CacheOptions): any {
   return function (
