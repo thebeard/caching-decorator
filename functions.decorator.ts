@@ -4,10 +4,37 @@ import * as pluralize from "pluralize";
 
 export function getDefaultKey(...args: any[]) {
   return args
-    .map((a) => ("" + a).replace(/ /g, "-"))
+    .map(allToString)
     .join("-")
     .toLowerCase();
 }
+
+function allToString(prop: any): string {
+  let keyString: string;
+  switch(typeof prop) {
+    case 'number':
+      keyString =  prop.toString();
+      break;
+    case 'string':
+      keyString = prop.replace(/ /g, "-").toLowerCase();
+      break;
+    case 'object':
+        if(prop instanceof Array) {
+          keyString = prop.map(allToString).join('-');
+        } else {
+          let keyStringCollection: string[] = [];
+
+          for (const [key, value] of Object.entries(prop).sort(([a],[b]) => a > b ? 1 : -1)) {
+            keyStringCollection = [...keyStringCollection, '' + key.toLowerCase(), allToString(value)];
+          }
+          keyString = keyStringCollection.map(k => k.toLowerCase()).join('-');
+        }
+        break;
+  }
+
+  return keyString || '*';
+}
+
 
 export function getStoreAndKey<K>(
   options: CacheOptions,

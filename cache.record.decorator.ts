@@ -27,7 +27,8 @@ export function CacheRecord<K = any>(options?: CacheOptions): any {
     // Rewrite the method with our decorator
     descriptor.value = function (...args: any[]) {
       // Calculate record key
-      const key = getDefaultKey(args);
+      const { single = getDefaultKey } = options?.keys ?? {},
+        key = single(args);
 
       // Place return observable into store if not found
       if (!store.has(key)) {

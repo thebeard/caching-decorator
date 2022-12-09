@@ -1,7 +1,7 @@
 import { forkJoin, Observable, of } from "rxjs";
 import { map, shareReplay, switchMap } from "rxjs/operators";
 import { CacheOptions } from "./cache-options";
-import { getStoreAndKeySet } from "./functions.decorator";
+import { getDefaultKey, getStoreAndKeySet } from "./functions.decorator";
 
 /**
  * Add multiple record caching to an observable-returning class method
@@ -36,26 +36,33 @@ export function CacheRecords<K = any>(options?: CacheOptions): any {
 
     // Rewrite the method with our decorator
     descriptor.value = function (...args: any[]) {
-      if (!store.has("1")) {
+      const {
+          multi = getDefaultKey,
+          singleInMulti = ({ id }: any) => "" + id,
+        } = options?.keys ?? {},
+        key = multi(args);
+
+      if (!store.has(key)) {
         let response$: Observable<string[]> = childFunction
           .apply(this, args)
           .pipe(
             map(transformOp),
             map((records: K[]) => {
               return records.map((record) => {
-                singleStore.set("" + record["id"], of(record));
-                return "" + record["id"];
+                const singleKey = singleInMulti(record);
+
+                singleStore.set(singleKey, of(record));
+                return singleKey;
               });
             }),
             shareReplay()
           );
 
-        // store page "1" (pagination)
-        store.set("1", response$);
+        store.set(key, response$);
       }
 
       // Return an observable, mapped via singular store, from indexed multiple store
-      return store.get("1").pipe(
+      return store.get(key).pipe(
         switchMap((records$) => {
           return forkJoin(
             ...records$.map((recordId) => singleStore.get(recordId))
