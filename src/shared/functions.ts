@@ -1,40 +1,42 @@
-import { Observable } from "rxjs";
-import { CacheOptions } from "./cache-options";
-import * as pluralize from "pluralize";
+import { Observable } from 'rxjs';
+import { CacheOptions } from '../interfaces/cache-options';
+import * as pluralize from 'pluralize';
 
 export function getDefaultKey(...args: any[]) {
-  return args
-    .map(allToString)
-    .join("-")
-    .toLowerCase();
+  return args.map(allToString).join('-').toLowerCase();
 }
 
 function allToString(prop: any): string {
   let keyString: string;
-  switch(typeof prop) {
+  switch (typeof prop) {
     case 'number':
-      keyString =  prop.toString();
+      keyString = prop.toString();
       break;
     case 'string':
-      keyString = prop.replace(/ /g, "-").toLowerCase();
+      keyString = prop.replace(/ /g, '-').toLowerCase();
       break;
     case 'object':
-        if(prop instanceof Array) {
-          keyString = prop.map(allToString).join('-');
-        } else {
-          let keyStringCollection: string[] = [];
+      if (prop instanceof Array) {
+        keyString = prop.map(allToString).join('-');
+      } else {
+        let keyStringCollection: string[] = [];
+        const sortedProps = Object.entries(prop).sort(([a], [b]) => (a > b ? 1 : -1));
 
-          for (const [key, value] of Object.entries(prop).sort(([a],[b]) => a > b ? 1 : -1)) {
-            keyStringCollection = [...keyStringCollection, '' + key.toLowerCase(), allToString(value)];
-          }
-          keyString = keyStringCollection.map(k => k.toLowerCase()).join('-');
+        for (const [key, value] of sortedProps) {
+          keyStringCollection = [
+            ...keyStringCollection,
+            '' + key.toLowerCase(),
+            allToString(value)
+          ];
         }
-        break;
+
+        keyString = keyStringCollection.map(k => k.toLowerCase()).join('-');
+      }
+      break;
   }
 
   return keyString || '*';
 }
-
 
 export function getStoreAndKey<K>(
   options: CacheOptions,
@@ -46,7 +48,7 @@ export function getStoreAndKey<K>(
   if (options?.storeKeys?.length && !!options.storeKeys[0]) {
     storeKey = options.storeKeys[0];
   } else {
-    if (propertyName.length > 3 && propertyName.substring(0, 3) === "get") {
+    if (propertyName.length > 3 && propertyName.substring(0, 3) === 'get') {
       propertyName = propertyName.substring(3);
     }
 
@@ -62,7 +64,7 @@ export function getStoreAndKeySet<K>(
   propertyName: string
 ): [string, Map<string, Observable<string[]>>, Map<string, Observable<K>>] {
   let singleStoreKey, multipleStoreKey;
-  if (propertyName.length > 3 && propertyName.substring(0, 3) === "get") {
+  if (propertyName.length > 3 && propertyName.substring(0, 3) === 'get') {
     propertyName = propertyName.substring(3);
   }
 

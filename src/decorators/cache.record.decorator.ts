@@ -1,7 +1,7 @@
-import { Observable } from "rxjs";
-import { shareReplay } from "rxjs/operators";
-import { CacheOptions } from "./cache-options";
-import { getDefaultKey, getStoreAndKey } from "./functions.decorator";
+import { Observable } from 'rxjs';
+import { shareReplay } from 'rxjs/operators';
+import { CacheOptions } from '../interfaces/cache-options';
+import { getDefaultKey, getStoreAndKey } from '../shared/functions';
 
 /**
  * Add single record caching to an observable-returning class method
@@ -11,11 +11,7 @@ import { getDefaultKey, getStoreAndKey } from "./functions.decorator";
  * @see README.md For example usage
  */
 export function CacheRecord<K = any>(options?: CacheOptions): any {
-  return function (
-    target: any,
-    propertyName: string,
-    descriptor: PropertyDescriptor
-  ) {
+  return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
     // Grab original method
     const childFunction: (...args: any[]) => Observable<K> = descriptor.value,
       // Determine storeKey and get store

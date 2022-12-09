@@ -1,9 +1,9 @@
 export interface CacheOptions {
   keys?: {
-    single?: (...args: any[]) => string,
-    multi?: (...args: any[]) => string,
-    singleInMulti?: (response: any) => string
-  }
+    single?: (...args: any[]) => string;
+    multi?: (...args: any[]) => string;
+    singleInMulti?: (response: any) => string;
+  };
 
   /**
    * Set of custom store keys for single records
