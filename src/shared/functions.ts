@@ -2,10 +2,40 @@ import { Observable } from 'rxjs';
 import { CacheOptions } from '../interfaces/cache-options';
 import * as pluralize from 'pluralize';
 
+/**
+ * From a list of arguments produce a string identifier
+ * @param args Indefinite list of arguments
+ * @returns Key string
+ */
 export function getDefaultKey(...args: any[]) {
   return args.map(allToString).join('-').toLowerCase();
 }
 
+/**
+ * Convert an object or array to a string
+ * @param prop Array or object to convert
+ * @returns Converted string
+ */
+function objToString(prop: any[] | Record<string, any>) {
+  if (prop instanceof Array) {
+    return prop.map(allToString).join('-');
+  } else {
+    let keyStringCollection: string[] = [];
+    const sortedProps = Object.entries(prop).sort(([a], [b]) => (a > b ? 1 : -1));
+
+    for (const [key, value] of sortedProps) {
+      keyStringCollection = [...keyStringCollection, '' + key.toLowerCase(), allToString(value)];
+    }
+
+    return keyStringCollection.map(k => k.toLowerCase()).join('-');
+  }
+}
+
+/**
+ * Convert variable of any type to a string
+ * @param prop Variable to convert
+ * @returns Converted string
+ */
 function allToString(prop: any): string {
   let keyString: string;
   switch (typeof prop) {
@@ -16,28 +46,19 @@ function allToString(prop: any): string {
       keyString = prop.replace(/ /g, '-').toLowerCase();
       break;
     case 'object':
-      if (prop instanceof Array) {
-        keyString = prop.map(allToString).join('-');
-      } else {
-        let keyStringCollection: string[] = [];
-        const sortedProps = Object.entries(prop).sort(([a], [b]) => (a > b ? 1 : -1));
-
-        for (const [key, value] of sortedProps) {
-          keyStringCollection = [
-            ...keyStringCollection,
-            '' + key.toLowerCase(),
-            allToString(value)
-          ];
-        }
-
-        keyString = keyStringCollection.map(k => k.toLowerCase()).join('-');
-      }
+      keyString = objToString(prop);
       break;
   }
 
   return keyString || '*';
 }
 
+/**
+ * Generate and return a store and its key (identifier)
+ * @param options Caching options
+ * @param propertyName Name of associated method
+ * @returns Store and its key
+ */
 export function getStoreAndKey<K>(
   options: CacheOptions,
   propertyName: string
@@ -58,12 +79,23 @@ export function getStoreAndKey<K>(
   return [storeKey, store];
 }
 
+/**
+ * Generate and return 2x complementary stores and their keys (identifiers)
+ * This also links the singular store to-/from- the class from which the
+ * method decorator is attached
+ *
+ * @param target Class containing associated method
+ * @param options Caching options
+ * @param propertyName Name of associated method
+ * @returns Two stores and their keys
+ */
 export function getStoreAndKeySet<K>(
   target: any,
   options: CacheOptions,
   propertyName: string
 ): [string, Map<string, Observable<string[]>>, Map<string, Observable<K>>] {
   let singleStoreKey, multipleStoreKey;
+
   if (propertyName.length > 3 && propertyName.substring(0, 3) === 'get') {
     propertyName = propertyName.substring(3);
   }

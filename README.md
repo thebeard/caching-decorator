@@ -19,7 +19,7 @@ class PostsService {
   }
 
   @CacheRecords({
-    transform: ({ posts }) => posts,
+    transform: ({ posts }) => posts
   })
   getPosts(): Observable<Post[]> {
     return of(/* from some origin */);

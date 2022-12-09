@@ -1,14 +1,13 @@
 {
   "name": "caching-decorator",
   "version": "1.0.0",
-  "description": "",
+  "description": "A library that contains caching decorators for use on class methods",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon ./tests/app.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "nodemon ./tests/app.ts"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Theunis Cilliers",
+  "license": "AGPL-3.0-only",
   "dependencies": {
     "axios": "^1.2.0",
     "pluralize": "^8.0.0",
