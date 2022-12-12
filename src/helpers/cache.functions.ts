@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
-import { CacheOptions } from '../interfaces/cache-options';
 import * as pluralize from 'pluralize';
+import { CacheOptions } from '@types';
 
 /**
  * From a list of arguments produce a string identifier

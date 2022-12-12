@@ -1,7 +1,7 @@
 import { forkJoin, Observable, of } from 'rxjs';
 import { map, shareReplay, switchMap } from 'rxjs/operators';
-import { CacheOptions } from '../interfaces/cache-options';
-import { getDefaultKey, getStoreAndKeySet } from '../shared/functions';
+import { CacheOptions } from '@types';
+import { getDefaultKey, getStoreAndKeySet } from '@helpers';
 
 /**
  * Add multiple record caching to an observable-returning class method
@@ -56,6 +56,23 @@ export function CacheRecords<K = any>(options?: CacheOptions): any {
         })
       );
     };
+
+    let clearCache;
+    const oldClearCache = target['clearCache'];
+    if (oldClearCache !== undefined) {
+      clearCache = () => {
+        oldClearCache();
+        store.clear();
+        singleStore.clear();
+      };
+    } else {
+      clearCache = () => {
+        store.clear();
+        singleStore.clear();
+      };
+    }
+
+    target['clearCache'] = clearCache;
 
     // Return descriptor with replaced (wrapped) method
     return descriptor;

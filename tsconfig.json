@@ -1,6 +1,21 @@
 {
   "compilerOptions": {
     "experimentalDecorators": true,
-    "lib": ["DOM", "ESNext"]
-  }
+    "emitDecoratorMetadata": true,
+    "lib": ["DOM", "ESNext"],
+    "types": ["cypress", "node"],
+    "target": "ES6",
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "@decorators": ["src/decorators"],
+      "@examples": ["examples"],
+      "@helpers": ["src/helpers"],
+      "@test/data": ["tests/data"],
+      "@test/helpers": ["tests/helpers"],
+      "@test/types": ["tests/types"],
+      "@types": ["src/types"]
+    }
+  },
+  "include": ["tests/*.ts"]
 }
