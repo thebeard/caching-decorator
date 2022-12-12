@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import { shareReplay } from 'rxjs/operators';
 import { CacheOptions } from '@types';
-import { getDefaultKey, getStoreAndKey } from '@helpers';
+import { attachClearCacheToTarget, getDefaultKey, getStoreAndKey } from '@helpers';
 
 /**
  * Add single record caching to an observable-returning class method
@@ -35,20 +35,10 @@ export function CacheRecord<K = any>(options?: CacheOptions): any {
       return store.get(key);
     };
 
-    let clearCache;
-    const oldClearCache = target['clearCache'];
-    if (oldClearCache !== undefined) {
-      clearCache = () => {
-        oldClearCache();
-        store.clear();
-      };
-    } else {
-      clearCache = () => {
-        store.clear();
-      };
-    }
-
-    target['clearCache'] = clearCache;
+    // Register this store for clearance on target cache clear
+    attachClearCacheToTarget(target, () => {
+      store.clear();
+    });
 
     // Return descriptor with replaced (wrapped) method
     return descriptor;

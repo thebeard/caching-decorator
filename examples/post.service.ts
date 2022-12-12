@@ -4,13 +4,6 @@ import { CacheClear, CacheRecord, CacheRecords } from '@decorators';
 import { Post } from './interfaces/post.interface';
 import { MockHttpServer } from '@test/helpers';
 
-// export let httpRequests = 0;
-
-// axios.interceptors.request.use(config => {
-//   httpRequests++;
-//   return config;
-// });
-
 const defaultCachingConfig: CacheOptions = {
   keys: { singleInMulti: ({ id }) => '' + id },
   storeKeys: ['postStore', 'postsStore']

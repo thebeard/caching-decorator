@@ -120,3 +120,26 @@ export function getStoreAndKeySet<K>(
 
   return [multipleStoreKey, store, singleStore];
 }
+
+/**
+ * Attach store clearance function to existing clearance function
+ * and re(attach) to target of decorator(s)
+ * @param target Class containing stores to clear
+ * @param decoratorClear Function to clear (more) store(s)
+ */
+export function attachClearCacheToTarget(target: any, decoratorClear: () => void) {
+  let clearCache;
+  const oldClearCache = target['clearCache'];
+  if (oldClearCache !== undefined) {
+    clearCache = () => {
+      oldClearCache();
+      decoratorClear();
+    };
+  } else {
+    clearCache = () => {
+      decoratorClear();
+    };
+  }
+
+  target['clearCache'] = clearCache;
+}
