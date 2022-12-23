@@ -27,12 +27,15 @@ describe('Basic tests', function () {
 
   it('can cache another few basic requests', () => {
     const test: Test = [
-      [() => service.getPosts()],
       [() => service.getPost(1)],
+      [() => service.getPost(2)],
+      [() => service.getPost(3)],
+      [() => service.getPost(4)],
+      [() => service.getPosts()],
       [
-        () => service.getPosts(),
+        () => service.getPost(4),
         () => {
-          expect(http.count).to.eq(1);
+          expect(http.count).to.eq(5);
         }
       ]
     ];

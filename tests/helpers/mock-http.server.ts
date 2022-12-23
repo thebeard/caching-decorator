@@ -13,7 +13,7 @@ export class MockHttpServer {
     this._count++;
 
     const records = this.getResources<K>(url);
-    return of(records).pipe(delay(1000));
+    return of(records).pipe(delay(50));
   }
 
   post<K = any, L = K>(url: string, request: any, options?: any): Observable<K> {
