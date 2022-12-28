@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import { shareReplay, tap } from 'rxjs/operators';
-import { attachClearCacheToTarget, getDefaultKey, getLogFunction, getStoreAndKey } from '@helpers';
 import { CacheOptions } from '@types';
+import { getDefaultKey, getLogFunction, getStoreAndKey } from '@helpers';
 
 /**
  * Add single record caching to an observable-returning class method
@@ -11,17 +11,16 @@ import { CacheOptions } from '@types';
 export function CacheRecord<K = any>(options?: CacheOptions): any {
   return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
     // Grab original method
-    const childFunction: (...args: any[]) => Observable<K> = descriptor.value,
-      // Determine storeKey and get store
-      [storeKey, store] = getStoreAndKey<K>(options, propertyName);
+    const childFunction: (...args: any[]) => Observable<K> = descriptor.value;
 
     // Rewrite the method with our decorator
     descriptor.value = function (...args: any[]) {
-      // Get logging function
-      const log = getLogFunction(options);
-
-      // Calculate record key
-      const { single = getDefaultKey } = options?.keys ?? {},
+      // Determine storeKey and get store
+      const [storeKey, store] = getStoreAndKey<K>(target, options, propertyName),
+        // Get logging function
+        log = getLogFunction(options),
+        // Calculate record key
+        { single = getDefaultKey } = options?.keys ?? {},
         key = single(args);
 
       // Place return observable into store if not found
@@ -46,11 +45,6 @@ export function CacheRecord<K = any>(options?: CacheOptions): any {
           )
         );
     };
-
-    // Register this store for clearance on target cache clear
-    attachClearCacheToTarget(target, () => {
-      store.clear();
-    });
 
     // Return descriptor with replaced (wrapped) method
     return descriptor;

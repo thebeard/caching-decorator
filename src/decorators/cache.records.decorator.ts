@@ -1,12 +1,7 @@
 import { forkJoin, Observable, of } from 'rxjs';
 import { map, shareReplay, switchMap, tap } from 'rxjs/operators';
-import {
-  attachClearCacheToTarget,
-  getDefaultKey,
-  getLogFunction,
-  getStoreAndKeySet
-} from '@helpers';
 import { CacheOptions } from '@types';
+import { getDefaultKey, getLogFunction, getStoreAndKeySet } from '@helpers';
 
 /**
  * Add multiple record caching to an observable-returning class method
@@ -17,8 +12,6 @@ export function CacheRecords<K = any>(options?: CacheOptions): any {
   return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
     // Grab original method
     const childFunction: (...args: any[]) => Observable<K[]> = descriptor.value,
-      // Determine storeKey and get singular and multiple stores
-      [storeKey, store, singleStore] = getStoreAndKeySet(target, options, propertyName),
       // Get transform operation from options or non-transforming operation if omitted
       transformOp =
         options.transform ??
@@ -28,7 +21,11 @@ export function CacheRecords<K = any>(options?: CacheOptions): any {
 
     // Rewrite the method with our decorator
     descriptor.value = function (...args: any[]) {
-      const log = getLogFunction(options),
+      // Determine storeKey and get singular and multiple stores
+      const [storeKey, store, singleStore] = getStoreAndKeySet(target, options, propertyName),
+        // Get logging function
+        log = getLogFunction(options),
+        // Calculate record key
         { multi = getDefaultKey, singleInMulti = ({ id }: any) => '' + id } = options?.keys ?? {},
         key = multi(args);
 
@@ -62,12 +59,6 @@ export function CacheRecords<K = any>(options?: CacheOptions): any {
         )
       );
     };
-
-    // Register these stores for clearance on target cache clear
-    attachClearCacheToTarget(target, () => {
-      store.clear();
-      singleStore.clear();
-    });
 
     // Return descriptor with replaced (wrapped) method
     return descriptor;

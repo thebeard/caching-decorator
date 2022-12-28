@@ -1,8 +1,8 @@
 import { Observable } from 'rxjs';
 import * as pluralize from 'pluralize';
+import { getAssociatedKeysAndTargets, getGlobalStore } from './state';
 import { CacheOptions } from '@types';
 import { getDefaultOptions } from './defaults';
-import { getGlobalStore } from './state';
 
 /**
  * From a list of arguments produce a string identifier
@@ -62,6 +62,7 @@ function allToString(prop: any): string {
  * @returns Store and its key
  */
 export function getStoreAndKey<K>(
+  target: any,
   options: CacheOptions,
   propertyName: string
 ): [string, Map<string, Observable<K>>] {
@@ -81,6 +82,8 @@ export function getStoreAndKey<K>(
   if (!globalStore[storeKey]) {
     globalStore[storeKey] = new Map<string, Observable<K>>();
   }
+
+  associateKeyAndTarget(target, [storeKey]);
 
   return [storeKey, globalStore[storeKey]];
 }
@@ -129,30 +132,9 @@ export function getStoreAndKeySet<K>(
     globalStore[multipleStoreKey] = new Map<string, Observable<string[]>>();
   }
 
+  associateKeyAndTarget(target, [singleStoreKey, multipleStoreKey]);
+
   return [multipleStoreKey, globalStore[multipleStoreKey], globalStore[singleStoreKey]];
-}
-
-/**
- * Attach store clearance function to existing clearance function
- * and re(attach) to target of decorator(s)
- * @param target Class containing stores to clear
- * @param decoratorClear Function to clear (more) store(s)
- */
-export function attachClearCacheToTarget(target: any, decoratorClear: () => void) {
-  let clearCache;
-  const oldClearCache = target['_clearCache'];
-  if (oldClearCache !== undefined) {
-    clearCache = () => {
-      oldClearCache();
-      decoratorClear();
-    };
-  } else {
-    clearCache = () => {
-      decoratorClear();
-    };
-  }
-
-  target['_clearCache'] = clearCache;
 }
 
 /**
@@ -166,4 +148,35 @@ export function getLogFunction(options: CacheOptions): (message: string) => void
     debugProperty = debug === true ? 'debug' : debug;
 
   return debug ? console[debugProperty] : function () {};
+}
+
+export function getCacheClearFunction(target?: any): () => boolean {
+  return () => {
+    const globalStore = getGlobalStore(),
+      associatedKeys = getAssociatedKeysAndTargets().get(target.constructor.name),
+      clearableKeys = Object.keys(globalStore).filter(k => associatedKeys?.includes(k));
+
+    if ((!associatedKeys || !clearableKeys?.length) && !!target) {
+      return false;
+    }
+
+    for (const key of Object.keys(globalStore).filter(k => associatedKeys?.includes(k) ?? true)) {
+      delete globalStore[key];
+    }
+
+    return true;
+  };
+}
+
+export function associateKeyAndTarget(target: any, keys: string[]) {
+  const associatedKeysAndTargets = getAssociatedKeysAndTargets();
+
+  const associatedKeys = associatedKeysAndTargets.get(target.constructor.name) ?? [];
+  keys.forEach(k => {
+    if (!associatedKeys.includes(k)) {
+      associatedKeys.push(k);
+    }
+  });
+
+  associatedKeysAndTargets.set(target.constructor.name, associatedKeys);
 }

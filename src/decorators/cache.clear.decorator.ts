@@ -1,5 +1,5 @@
 import { CacheOptions } from '@types';
-import { getLogFunction } from '@helpers';
+import { getCacheClearFunction, getLogFunction } from '@helpers';
 
 /**
  * Attach cache clearing function to associated class property or method
@@ -13,14 +13,15 @@ export function CacheClear(options?: CacheOptions): any {
       enumerable: false,
       writable: true,
       value: function () {
-        const log = getLogFunction(options);
+        const log = getLogFunction(options),
+          clearCache = getCacheClearFunction(target);
 
-        if (target['_clearCache'] && typeof target['_clearCache'] === 'function') {
-          target['_clearCache']();
-
-          log(`-cleared- cache for ${target.constructor.name}`);
-        } else {
-          log(`no cache to clear for ${target.constructor.name}`);
+        if (clearCache && typeof clearCache === 'function') {
+          if (clearCache()) {
+            log(`-cleared- cache for ${target.constructor.name}`);
+          } else {
+            log(`no cache to clear for ${target.constructor.name}`);
+          }
         }
       }
     };
