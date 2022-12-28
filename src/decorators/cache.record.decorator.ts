@@ -15,9 +15,6 @@ export function CacheRecord<K = any>(options?: CacheOptions): any {
       // Determine storeKey and get store
       [storeKey, store] = getStoreAndKey<K>(options, propertyName);
 
-    // Point class to generated store
-    target[storeKey] = store;
-
     // Rewrite the method with our decorator
     descriptor.value = function (...args: any[]) {
       // Get logging function

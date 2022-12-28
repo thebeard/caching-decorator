@@ -2,6 +2,7 @@ import { Observable } from 'rxjs';
 import * as pluralize from 'pluralize';
 import { CacheOptions } from '@types';
 import { getDefaultOptions } from './defaults';
+import { getGlobalStore } from './state';
 
 /**
  * From a list of arguments produce a string identifier
@@ -65,7 +66,7 @@ export function getStoreAndKey<K>(
   propertyName: string
 ): [string, Map<string, Observable<K>>] {
   let storeKey: string;
-  const store = new Map<string, Observable<K>>();
+  const globalStore = getGlobalStore();
 
   if (options?.storeKeys?.length && !!options.storeKeys[0]) {
     storeKey = options.storeKeys[0];
@@ -77,7 +78,11 @@ export function getStoreAndKey<K>(
     storeKey = `${propertyName}Store`;
   }
 
-  return [storeKey, store];
+  if (!globalStore[storeKey]) {
+    globalStore[storeKey] = new Map<string, Observable<K>>();
+  }
+
+  return [storeKey, globalStore[storeKey]];
 }
 
 /**
@@ -96,6 +101,7 @@ export function getStoreAndKeySet<K>(
   propertyName: string
 ): [string, Map<string, Observable<string[]>>, Map<string, Observable<K>>] {
   let singleStoreKey, multipleStoreKey;
+  const globalStore = getGlobalStore();
 
   if (propertyName.length > 3 && propertyName.substring(0, 3) === 'get') {
     propertyName = propertyName.substring(3);
@@ -115,11 +121,15 @@ export function getStoreAndKeySet<K>(
     multipleStoreKey = `${propertyName}Store`;
   }
 
-  const singleStore: Map<string, Observable<K>> = target[singleStoreKey] ??
-    new Map<string, Observable<K>>(),
-    store = new Map<string, Observable<string[]>>();
+  if (!globalStore[singleStoreKey]) {
+    globalStore[singleStoreKey] = new Map<string, Observable<K>>();
+  }
 
-  return [multipleStoreKey, store, singleStore];
+  if (!globalStore[multipleStoreKey]) {
+    globalStore[multipleStoreKey] = new Map<string, Observable<string[]>>();
+  }
+
+  return [multipleStoreKey, globalStore[multipleStoreKey], globalStore[singleStoreKey]];
 }
 
 /**

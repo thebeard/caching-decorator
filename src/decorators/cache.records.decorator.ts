@@ -26,9 +26,6 @@ export function CacheRecords<K = any>(options?: CacheOptions): any {
           return r;
         };
 
-    // Point class to generated store
-    target[storeKey] = store;
-
     // Rewrite the method with our decorator
     descriptor.value = function (...args: any[]) {
       const log = getLogFunction(options),
