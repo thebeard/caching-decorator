@@ -1,14 +1,17 @@
 import { forkJoin, Observable, of } from 'rxjs';
-import { map, shareReplay, switchMap } from 'rxjs/operators';
+import { map, shareReplay, switchMap, tap } from 'rxjs/operators';
+import {
+  attachClearCacheToTarget,
+  getDefaultKey,
+  getLogFunction,
+  getStoreAndKeySet
+} from '@helpers';
 import { CacheOptions } from '@types';
-import { attachClearCacheToTarget, getDefaultKey, getStoreAndKeySet } from '@helpers';
 
 /**
  * Add multiple record caching to an observable-returning class method
- *
  * @param options Caching options
- * @returns Original method with caching added
- * @see README.md For example usage
+ * @returns `(target: any, propertyName: string, descriptor: PropertyDescriptor) => PropertyDescriptor`
  */
 export function CacheRecords<K = any>(options?: CacheOptions): any {
   return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
@@ -28,13 +31,16 @@ export function CacheRecords<K = any>(options?: CacheOptions): any {
 
     // Rewrite the method with our decorator
     descriptor.value = function (...args: any[]) {
-      const { multi = getDefaultKey, singleInMulti = ({ id }: any) => '' + id } =
-          options?.keys ?? {},
+      const log = getLogFunction(options),
+        { multi = getDefaultKey, singleInMulti = ({ id }: any) => '' + id } = options?.keys ?? {},
         key = multi(args);
 
       if (!store.has(key)) {
         let response$: Observable<string[]> = childFunction.apply(this, args).pipe(
           map(transformOp),
+          tap((value: any) =>
+            log(`-stored- ${storeKey} with ${value.length} entries: ${JSON.stringify(value)}`)
+          ),
           map((records: K[]) => {
             return records.map(record => {
               const singleKey = singleInMulti(record);
@@ -53,7 +59,10 @@ export function CacheRecords<K = any>(options?: CacheOptions): any {
       return store.get(key).pipe(
         switchMap(records$ => {
           return forkJoin(...records$.map(recordId => singleStore.get(recordId)));
-        })
+        }),
+        tap(value =>
+          log(`-returned- ${storeKey} with ${value.length} entries: ${JSON.stringify(value)}`)
+        )
       );
     };
 

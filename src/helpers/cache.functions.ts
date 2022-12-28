@@ -1,6 +1,7 @@
 import { Observable } from 'rxjs';
 import * as pluralize from 'pluralize';
 import { CacheOptions } from '@types';
+import { getDefaultOptions } from './defaults';
 
 /**
  * From a list of arguments produce a string identifier
@@ -129,7 +130,7 @@ export function getStoreAndKeySet<K>(
  */
 export function attachClearCacheToTarget(target: any, decoratorClear: () => void) {
   let clearCache;
-  const oldClearCache = target['clearCache'];
+  const oldClearCache = target['_clearCache'];
   if (oldClearCache !== undefined) {
     clearCache = () => {
       oldClearCache();
@@ -141,5 +142,18 @@ export function attachClearCacheToTarget(target: any, decoratorClear: () => void
     };
   }
 
-  target['clearCache'] = clearCache;
+  target['_clearCache'] = clearCache;
+}
+
+/**
+ * Return a function that will log a message, using the
+ * log provider specified in the options
+ * @param options Caching options
+ * @returns A function to log a message
+ */
+export function getLogFunction(options: CacheOptions): (message: string) => void {
+  const { debug } = Object.assign({ ...getDefaultOptions() }, options),
+    debugProperty = debug === true ? 'debug' : debug;
+
+  return debug ? console[debugProperty] : function () {};
 }

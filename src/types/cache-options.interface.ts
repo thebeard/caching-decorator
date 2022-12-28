@@ -1,4 +1,6 @@
 export interface CacheOptions {
+  debug?: 'debug' | 'log' | true;
+
   keys?: {
     single?: (...args: any[]) => string;
     multi?: (...args: any[]) => string;
@@ -6,25 +8,31 @@ export interface CacheOptions {
   };
 
   /**
-   * Set of custom store keys for single records
-   * and a collection of record keys, respectively
+   * Set of custom store keys for single records and
+   * for a collection of record identifiers, respectively
    *
    * Example: `["productStore", "productsStore"]`
    *
    * When using both the CacheRecord and CacheRecords
    * decorators within the same class to cache the
    * same entity types, the first argument of this key
-   * set should match the complementing methods.
+   * set (array) should match the complementing methods.
    *
    * In most CRUD-like services, it's easier to omit
-   * this property and have the class resolve the keys
-   * itself.
+   * this property and have the class helpers in this
+   * library resolve the keys itself.
    *
-   * When auto resolving store keys, naming methods
-   * with a `get` prefix would produce semantically
-   * correct store keys. `getPost` and `getPosts`
-   * method names would produce `PostStore` and
-   * `PostsStore` keys.
+   * When automatically resolving these store keys,
+   * naming methods with a `get` prefix would produce
+   * semantically correct store keys. `getPost` and
+   * `getPosts` method names would produce `PostStore`
+   * and `PostsStore` keys.
+   *
+   * Predominantly these store keys are arbitrary and
+   * the use of the automatic resolver is encouraged.
+   * With debug mode on, or when using certain storage
+   * providers, troubleshooting might be easier when
+   * knowing (or explicitly setting) your store keys.
    */
   storeKeys?: [string?, string?];
 

@@ -12,8 +12,8 @@ describe('Basic tests', function () {
 
   it('can cache a few basic requests', () => {
     const test: Test = [
-      [() => service.getPosts()],
-      [() => service.getPost(1)],
+      [() => service.getPosts(), value => expect(value.length).to.equal(20)],
+      [() => service.getPost(1), ({ id }) => expect(id).to.equal(1)],
       [
         () => service.getPosts(),
         () => {
@@ -28,6 +28,7 @@ describe('Basic tests', function () {
   it('can cache another few basic requests', () => {
     const test: Test = [
       [() => service.getPost(1)],
+      [() => service.getPost(1), ({ id }) => expect(id).to.equal(1)],
       [() => service.getPost(2)],
       [() => service.getPost(3)],
       [() => service.getPost(4)],
@@ -46,6 +47,8 @@ describe('Basic tests', function () {
   it('can cache clear cache from decorator', () => {
     const test: Test = [
       [() => service.getPosts()],
+      [() => service.getPost(1)],
+      [() => service.getPost(2)],
       [() => service.clearCache()],
       [
         () => service.getPosts(),
