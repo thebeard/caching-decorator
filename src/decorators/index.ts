@@ -1,3 +1,3 @@
-export * from './cache.clear.decorator';
-export * from './cache.record.decorator';
-export * from './cache.records.decorator';
+export * from './cache.many.decorator';
+export * from './cache.one.decorator';
+export * from './flush.cache.decorator';

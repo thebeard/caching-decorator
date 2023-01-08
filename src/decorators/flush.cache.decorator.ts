@@ -1,12 +1,12 @@
 import { CacheOptions } from '@types';
-import { getCacheClearFunction, getLogFunction } from '@helpers';
+import { getFlushCacheFunction, getLogFunction } from '@helpers';
 
 /**
  * Attach cache clearing function to associated class property or method
  * @param options Caching options
  * @returns `(target:any) => PropertyDescriptor`
  */
-export function CacheClear(options?: CacheOptions): any {
+export function FlushCache(options?: CacheOptions): any {
   return function (target: any) {
     return {
       configurable: true,
@@ -14,7 +14,7 @@ export function CacheClear(options?: CacheOptions): any {
       writable: true,
       value: function () {
         const log = getLogFunction(options),
-          clearCache = getCacheClearFunction(target);
+          clearCache = getFlushCacheFunction(target);
 
         if (clearCache && typeof clearCache === 'function') {
           if (clearCache()) {

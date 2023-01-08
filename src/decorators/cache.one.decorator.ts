@@ -8,7 +8,7 @@ import { getDefaultKey, getLogFunction, getStoreAndKey } from '@helpers';
  * @param options Caching options
  * @returns `(target: any, propertyName: string, descriptor: PropertyDescriptor) => PropertyDescriptor`
  */
-export function CacheRecord<K = any>(options?: CacheOptions): any {
+export function CacheOne<K = any>(options?: CacheOptions): any {
   return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
     // Grab original method
     const childFunction: (...args: any[]) => Observable<K> = descriptor.value;

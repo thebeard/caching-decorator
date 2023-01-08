@@ -1,16 +1,16 @@
-import { CacheClear } from '@decorators';
-import { ICacheClear } from '@types';
+import { FlushCache } from '@decorators';
+import { IFlushCache } from '@types';
 
 export class IncompleteService {
-  @CacheClear({ debug: 'log' })
-  clearAndLog: ICacheClear;
+  @FlushCache({ debug: 'log' })
+  clearAndLog: IFlushCache;
 
-  @CacheClear({ debug: 'debug' })
-  clearAndDebug: ICacheClear;
+  @FlushCache({ debug: 'debug' })
+  clearAndDebug: IFlushCache;
 
   /**
    * Debug setting provided by default settings in associated tests
    */
-  @CacheClear()
-  clearCache: ICacheClear;
+  @FlushCache()
+  clearCache: IFlushCache;
 }

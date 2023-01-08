@@ -7,13 +7,17 @@ export interface CacheOptions {
     singleInMulti?: (response: any) => string;
   };
 
+  mode?: 'read' | 'write';
+
+  normalize?: boolean;
+
   /**
    * Set of custom store keys for single records and
    * for a collection of record identifiers, respectively
    *
    * Example: `["productStore", "productsStore"]`
    *
-   * When using both the CacheRecord and CacheRecords
+   * When using both the CacheOne and CacheMany
    * decorators within the same class to cache the
    * same entity types, the first argument of this key
    * set (array) should match the complementing methods.

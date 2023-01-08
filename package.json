@@ -1,7 +1,7 @@
 {
-  "name": "caching-decorator",
+  "name": "cashew-tools",
   "version": "1.0.0",
-  "description": "A library that contains caching decorators for use on class methods",
+  "description": "A library that contains javascript and typescripts caching tools",
   "main": "index.js",
   "scripts": {
     "test": "cypress run",

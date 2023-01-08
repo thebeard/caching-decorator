@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
-import { CacheClear, CacheRecord, CacheRecords } from '@decorators';
-import { CacheOptions, ICacheClear } from '@types';
+import { CacheOne, CacheMany, FlushCache } from '@decorators';
+import { CacheOptions, IFlushCache } from '@types';
 import { MockHttpServer } from '@test/helpers';
 import { Post } from './interfaces/post.interface';
 
@@ -14,29 +14,29 @@ export class PostService {
 
   constructor(private http: MockHttpServer) {}
 
-  @CacheClear()
-  clearCache: ICacheClear;
+  @FlushCache()
+  clearCache: IFlushCache;
 
-  @CacheRecord(defaultCachingConfig)
+  @CacheOne(defaultCachingConfig)
   getPost(id: number): Observable<Post> {
     return this.http.get<Post>(`${this.apiUrl}/posts/${id}`);
   }
 
-  @CacheRecords({
+  @CacheMany({
     ...defaultCachingConfig
   })
   getPosts(): Observable<Post[]> {
     return this.http.get<Post[]>(`${this.apiUrl}/posts`);
   }
 
-  @CacheRecords({
+  @CacheMany({
     ...defaultCachingConfig
   })
   getPostsOneArg(someObject): Observable<Post[]> {
     return this.http.get<Post[]>(`${this.apiUrl}/posts?limit=1`);
   }
 
-  @CacheRecords({
+  @CacheMany({
     ...defaultCachingConfig
   })
   getPostsTwoArgs(pagination, someObject): Observable<Post[]> {

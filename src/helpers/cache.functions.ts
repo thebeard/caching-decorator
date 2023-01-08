@@ -150,7 +150,7 @@ export function getLogFunction(options: CacheOptions): (message: string) => void
   return debug ? console[debugProperty] : function () {};
 }
 
-export function getCacheClearFunction(target?: any): () => boolean {
+export function getFlushCacheFunction(target?: any): () => boolean {
   return () => {
     const globalStore = getGlobalStore(),
       associatedKeys = getAssociatedKeysAndTargets().get(target.constructor.name),
