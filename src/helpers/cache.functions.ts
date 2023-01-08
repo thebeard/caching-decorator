@@ -62,7 +62,7 @@ function allToString(prop: any): string {
  * @returns Store and its key
  */
 export function getStoreAndKey<K>(
-  target: any,
+  targetName: string,
   options: CacheOptions,
   propertyName: string
 ): [string, Map<string, Observable<K>>] {
@@ -83,7 +83,7 @@ export function getStoreAndKey<K>(
     globalStore[storeKey] = new Map<string, Observable<K>>();
   }
 
-  associateKeyAndTarget(target, [storeKey]);
+  associateKeyAndTarget(targetName, [storeKey]);
 
   return [storeKey, globalStore[storeKey]];
 }
@@ -99,7 +99,7 @@ export function getStoreAndKey<K>(
  * @returns Two stores and their keys
  */
 export function getStoreAndKeySet<K>(
-  target: any,
+  targetName: string,
   options: CacheOptions,
   propertyName: string
 ): [string, Map<string, Observable<string[]>>, Map<string, Observable<K>>] {
@@ -132,7 +132,7 @@ export function getStoreAndKeySet<K>(
     globalStore[multipleStoreKey] = new Map<string, Observable<string[]>>();
   }
 
-  associateKeyAndTarget(target, [singleStoreKey, multipleStoreKey]);
+  associateKeyAndTarget(targetName, [singleStoreKey, multipleStoreKey]);
 
   return [multipleStoreKey, globalStore[multipleStoreKey], globalStore[singleStoreKey]];
 }
@@ -150,13 +150,13 @@ export function getLogFunction(options: CacheOptions): (message: string) => void
   return debug ? console[debugProperty] : function () {};
 }
 
-export function getFlushCacheFunction(target?: any): () => boolean {
+export function getFlushCacheFunction(id?: string): () => boolean {
   return () => {
     const globalStore = getGlobalStore(),
-      associatedKeys = getAssociatedKeysAndTargets().get(target.constructor.name),
+      associatedKeys = getAssociatedKeysAndTargets().get(id),
       clearableKeys = Object.keys(globalStore).filter(k => associatedKeys?.includes(k));
 
-    if ((!associatedKeys || !clearableKeys?.length) && !!target) {
+    if ((!associatedKeys || !clearableKeys?.length) && !!id) {
       return false;
     }
 
@@ -168,15 +168,15 @@ export function getFlushCacheFunction(target?: any): () => boolean {
   };
 }
 
-export function associateKeyAndTarget(target: any, keys: string[]) {
+export function associateKeyAndTarget(targetName: string, keys: string[]) {
   const associatedKeysAndTargets = getAssociatedKeysAndTargets();
 
-  const associatedKeys = associatedKeysAndTargets.get(target.constructor.name) ?? [];
+  const associatedKeys = associatedKeysAndTargets.get(targetName) ?? [];
   keys.forEach(k => {
     if (!associatedKeys.includes(k)) {
       associatedKeys.push(k);
     }
   });
 
-  associatedKeysAndTargets.set(target.constructor.name, associatedKeys);
+  associatedKeysAndTargets.set(targetName, associatedKeys);
 }
