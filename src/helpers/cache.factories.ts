@@ -47,7 +47,7 @@ export function cacheOneFactory<K>(
   };
 }
 
-export function cacheManyFactory<K>(
+export function normalizedManyFactory<K>(
   primaryId: string,
   secondaryId: string,
   fn: (...args: any[]) => Observable<K[]>,
@@ -98,6 +98,20 @@ export function cacheManyFactory<K>(
       )
     );
   };
+}
+
+export function cacheManyFactory<K>(
+  primaryId: string,
+  secondaryId: string,
+  fn: (...args: any[]) => Observable<K[]>,
+  options?: CacheOptions
+): (...args: any) => Observable<any> {
+  const { normalize = true } = options ?? { normalize: true };
+
+  return normalize
+    ? normalizedManyFactory<K>(primaryId, secondaryId, fn, options)
+    : // here we use the default `cacheOneFactory` to produce a de-normalized many store
+      cacheOneFactory<K[]>(primaryId, secondaryId, fn, options);
 }
 
 export function flushCacheFactory(id: string, options?: CacheOptions): () => void {

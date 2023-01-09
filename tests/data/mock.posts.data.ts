@@ -21,7 +21,8 @@ Array.from({ length: 20 }).forEach((_, i) => {
  * @todo Complete first example db write operations
  */
 export const MockPostsData: MockDataGenerationSet<Post, Post> = {
-  get: POSTS,
+  index: () => POSTS,
+  read: (resourceId: number) => POSTS.find(({ id }) => +id === +resourceId),
   post: req => req,
   put: req => req,
   delete: id => null
